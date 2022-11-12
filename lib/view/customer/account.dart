@@ -19,6 +19,7 @@ class _AccountPageState extends State<AccountPage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+          // resizeToAvoidBottomInset: false,
           backgroundColor: Colors.white,
           appBar: AppBar(
             centerTitle: true,

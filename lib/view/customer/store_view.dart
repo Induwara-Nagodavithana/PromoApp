@@ -5,12 +5,14 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:promo_app/components/divider/mySeparator.dart';
+import 'package:promo_app/model/store.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:random_color/random_color.dart';
 import 'package:syncfusion_flutter_barcodes/barcodes.dart';
 
 class StoreViewPage extends StatefulWidget {
-  const StoreViewPage({super.key});
+  final Message data;
+  const StoreViewPage({Key? key, required this.data}) : super(key: key);
 
   @override
   State<StoreViewPage> createState() => _StoreViewPageState();
@@ -66,7 +68,7 @@ class _StoreViewPageState extends State<StoreViewPage> {
                     margin: EdgeInsets.all(1.0),
                     width: 300,
                     height: 500,
-                    padding: const EdgeInsets.all(10.0),
+                    // padding: const EdgeInsets.all(10.0),
                     decoration: BoxDecoration(
                       // color: Color.fromARGB(255, 198, 40, 40),
                       color: _color,
@@ -74,164 +76,212 @@ class _StoreViewPageState extends State<StoreViewPage> {
                     ),
                     child: Column(
                       children: [
-                        SizedBox(
-                          height: 10,
-                        ),
-                        ClipOval(
-                          child: CachedNetworkImage(
-                              height: 150,
-                              width: 150,
-                              imageUrl:
-                                  'https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL',
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Center(
-                                    child: FaIcon(
-                                      FontAwesomeIcons.store,
-                                      color: AppTheme.kPrimaryColor,
-                                    ),
-                                  ),
-                              errorWidget: (context, url, error) => Center(
-                                    child: FaIcon(
-                                      FontAwesomeIcons.store,
-                                      color: AppTheme.kPrimaryColor,
-                                    ),
-                                  )),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "KFC",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(
-                            textStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Open between",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(
-                            textStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.normal),
-                          ),
-                        ),
-                        Text(
-                          "10.00 am to 10.00 pm",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(
-                            textStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Address",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(
-                            textStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.normal),
-                          ),
-                        ),
-                        Text(
-                          "Niladeniya, Hapugala, Wackwella, sdfdsfsfsd",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(
-                            textStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 25,
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  "Category",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.dmSans(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.normal),
-                                  ),
-                                ),
-                                Text(
-                                  "Foods",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.dmSans(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Container(
-                              margin: EdgeInsets.all(10.0),
-                              width: 2,
-                              height: 50,
-                              child: VerticalDivider(
-                                color: Colors.white,
-                                thickness: 2,
-                                // width: 3,
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: 10,
                               ),
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "ContactNo",
-                                  textAlign: TextAlign.right,
-                                  style: GoogleFonts.dmSans(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.normal),
-                                  ),
+                              ClipOval(
+                                child: CachedNetworkImage(
+                                    height: 150,
+                                    width: 150,
+                                    imageUrl: widget.data.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Center(
+                                          child: FaIcon(
+                                            FontAwesomeIcons.store,
+                                            color: AppTheme.kPrimaryColor,
+                                          ),
+                                        ),
+                                    errorWidget: (context, url, error) =>
+                                        Center(
+                                          child: FaIcon(
+                                            FontAwesomeIcons.store,
+                                            color: AppTheme.kPrimaryColor,
+                                          ),
+                                        )),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                widget.data.name!,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dmSans(
+                                  textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                Text(
-                                  "0123456789",
-                                  textAlign: TextAlign.right,
-                                  style: GoogleFonts.dmSans(
-                                    textStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                "Open between",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dmSans(
+                                  textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.normal),
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              Text(
+                                widget.data.openHours!,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dmSans(
+                                  textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Text(
+                                "Address",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dmSans(
+                                  textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.normal),
+                                ),
+                              ),
+                              Text(
+                                widget.data.address!,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.dmSans(
+                                  textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 25,
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        "Category",
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.dmSans(
+                                          textStyle: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.normal),
+                                        ),
+                                      ),
+                                      Text(
+                                        widget.data.catergory!,
+                                        textAlign: TextAlign.center,
+                                        style: GoogleFonts.dmSans(
+                                          textStyle: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.all(10.0),
+                                    width: 2,
+                                    height: 50,
+                                    child: VerticalDivider(
+                                      color: Colors.white,
+                                      thickness: 2,
+                                      // width: 3,
+                                    ),
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "ContactNo",
+                                        textAlign: TextAlign.right,
+                                        style: GoogleFonts.dmSans(
+                                          textStyle: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.normal),
+                                        ),
+                                      ),
+                                      Text(
+                                        widget.data.contactNo!,
+                                        textAlign: TextAlign.right,
+                                        style: GoogleFonts.dmSans(
+                                          textStyle: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //   children: [
+                        //     Align(
+                        //       alignment: Alignment.centerLeft,
+                        //       child: Container(
+                        //         width: 10,
+                        //         height: 20,
+                        //         decoration: const BoxDecoration(
+                        //             color: Colors.white,
+                        //             borderRadius: BorderRadius.only(
+                        //               bottomRight: Radius.circular(10.0),
+                        //               topRight: Radius.circular(10.0),
+                        //             )),
+                        //       ),
+                        //     ),
+                        //     Align(
+                        //       alignment: Alignment.center,
+                        //       child: Container(
+                        //           width: size.width-113,
+                        //           child: MySeparator(
+                        //             color: Colors.white,
+                        //             height: 3,
+                        //           )),
+                        //     ),
+                        //     Align(
+                        //       alignment: Alignment.centerRight,
+                        //       child: Container(
+                        //         width: 10,
+                        //         height: 20,
+                        //         decoration: const BoxDecoration(
+                        //             color: Colors.white,
+                        //             borderRadius: BorderRadius.only(
+                        //               bottomLeft: Radius.circular(10.0),
+                        //               topLeft: Radius.circular(10.0),
+                        //             )),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
                         Container(
-                          margin: EdgeInsets.only(top: 25.0),
+                          margin: EdgeInsets.only(top: 35.0),
                           height: 50,
                           child: SfBarcodeGenerator(
                             value: 'www.syncfusion.com',

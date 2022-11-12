@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -8,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:promo_app/components/rounded_input_field/rounded_input_field_widget.dart';
 import 'package:promo_app/components/rounded_password_field/rounded_password_field_widget.dart';
+import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/httpService/httpService.dart';
 import 'package:promo_app/model/user.dart';
 import 'package:promo_app/theme/theme.dart';
@@ -22,7 +24,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String email = 'Nimal@gmail.com';
+  // String email = 'Nimal@gmail.com';
+  String email = 'i@gmail.com';
   String password = '1234';
 
   @override
@@ -120,10 +123,12 @@ class _LoginPageState extends State<LoginPage> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(40)),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         // viewModel.login();
-                        HttpService().getInstance().post(
-                            'https://jm2fwv34x0.execute-api.us-east-1.amazonaws.com/users/verifyUser',
+                        print('{email: $email,password: $password}');
+                        await FirebaseMessaging.instance
+                            .subscribeToTopic('Customer');
+                        HttpService().getInstance().post('/users/verifyUser',
                             data: {
                               'email': email,
                               'password': password
@@ -133,6 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                           UserModel userModel =
                               UserModel.fromJson(jsonDecode(value.data));
                           print(userModel);
+                          DataStore.shared.setUserId = userModel.message!.sId!;
                           if (userModel.message!.type == 'ShopOwner') {
                             Navigator.push(
                               context,

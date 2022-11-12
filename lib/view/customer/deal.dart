@@ -2,9 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:promo_app/components/rounded_search_field/rounded_search_field_widget.dart';
+import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/offers.dart';
+import 'package:promo_app/view/login.dart';
 
 class DealPage extends StatefulWidget {
   const DealPage({super.key});
@@ -130,8 +133,26 @@ class _DealPageState extends State<DealPage> {
                               ),
                               FloatingActionButton(
                                 elevation: 0,
-                                onPressed: () {
+                                onPressed: () async {
                                   // Add your onPressed code here!
+                                  await DataStore.shared.clearAll();
+
+                                  PersistentNavBarNavigator.pushNewScreen(
+                                    context,
+                                    screen: LoginPage(),
+                                    withNavBar:
+                                        false, // OPTIONAL VALUE. True by default.
+                                    pageTransitionAnimation:
+                                        PageTransitionAnimation.cupertino,
+                                  );
+                                  // Navigator.pushReplacement(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) {
+                                  //       return LoginPage();
+                                  //     },
+                                  //   ),
+                                  // );
                                 },
                                 child: FaIcon(
                                   FontAwesomeIcons.rightFromBracket,

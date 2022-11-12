@@ -1,16 +1,88 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:promo_app/helpers/data_store.dart';
+import 'package:promo_app/main.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/account.dart';
 import 'package:promo_app/view/customer/deal.dart';
 import 'package:promo_app/view/customer/notification.dart';
 import 'package:promo_app/view/customer/stores.dart';
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
+
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
+  @override
+  void initState() {
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification notification = message.notification!;
+      AndroidNotification android = message.notification!.android!;
+      print(notification);
+      print(message);
+      // If `onMessage` is triggered with a notification, construct our own
+      // local notification to show to users using the created channel.
+      if (notification != null && android != null) {
+        DataStore.shared.setOneNotification = {
+          'title': message.notification!.title,
+          'time': message.sentTime.toString(),
+          'body': message.notification!.body
+        };
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channelDescription: channel.description,
+                icon: '@mipmap/launcher_icon',
+                // other properties...
+              ),
+            ));
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      print('A new onMessageOpenedApp event was published');
+      RemoteNotification notification = message.notification!;
+      AndroidNotification android = message.notification!.android!;
+      print(notification.title);
+      print(message);
+      print('message');
+      print('body');
+      print(notification.body);
+      print(message.notification!.body);
+      print('message');
+      print('mesage');
+      print('message');
+      print('message');
+      print('message');
+      if (notification != null && android != null) {
+        print(notification);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return NotificationPage();
+              // return LandingDrawerView();
+            },
+          ),
+        );
+        // _navigationService.navigateToView(NotificationView(message:message));
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

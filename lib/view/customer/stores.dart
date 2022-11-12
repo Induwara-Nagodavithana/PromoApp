@@ -1,13 +1,20 @@
+import 'dart:collection';
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:promo_app/components/rounded_search_field/rounded_search_field_widget.dart';
+import 'package:promo_app/httpService/httpService.dart';
+import 'package:promo_app/model/store.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/store_view.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class StoresPage extends StatefulWidget {
   const StoresPage({super.key});
@@ -17,6 +24,73 @@ class StoresPage extends StatefulWidget {
 }
 
 class _StoresPageState extends State<StoresPage> {
+  List<Message> stores = [];
+  HashMap<String?, List<Message>> hashMap = HashMap<String?, List<Message>>();
+
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  void getStores() async {
+    ///whatever you want to run on page build
+    HttpService().getInstance().get('/stores').then((value) async {
+      print(value);
+
+      StoreModel storeModel = StoreModel.fromJson(jsonDecode(value.data));
+      print(storeModel.message);
+      HashMap<String?, List<Message>> hashMapTemp =
+          HashMap<String?, List<Message>>();
+
+      for (Message element in storeModel.message!) {
+        // if (hashMapTemp.containsKey(element.catergory)) {
+        //   hashMapTemp.update(element.catergory, (value) {
+        //     value.insert(element);
+        //   });
+        //   // hashMapTemp.addAll({element.catergory: element});
+        // } else {
+        //   hashMapTemp.putIfAbsent(element.catergory, () => [element]);
+        // }
+        hashMapTemp.update(element.catergory, (v) {
+          v.add(element);
+          return v;
+        }, ifAbsent: () => [element]);
+        print("hashMapTemp.toString()");
+        print(hashMapTemp.toString());
+      }
+      // await storeModel.message!.map(
+      //   (e) {
+      //     if (hashMap.containsKey(e.catergory)) {
+      //       hashMap.addAll({e.catergory: e});
+      //     } else {
+      //       hashMap.putIfAbsent(e.catergory, () => e);
+      //     }
+      //     print("hashMap.toString()");
+      //     print(hashMap.toString());
+      //     // e.catergory
+      //   },
+      // );
+      setState(() {
+        stores = storeModel.message!;
+        hashMap = hashMapTemp;
+        hashMap.forEach((key, value) {
+          print('$key : ${value.length} ${value[0].name} ');
+        });
+      });
+    }).catchError((err) {
+      print(err);
+      Fluttertoast.showToast(
+          msg: "Cannot Get Stores",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+    // ....
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getStores();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -52,136 +126,168 @@ class _StoresPageState extends State<StoresPage> {
     return Container(
       color: Colors.white,
       height: size.height - 86,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 40,
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Stores",
-                        style: GoogleFonts.dmSans(
-                          textStyle: TextStyle(
-                              color: Colors.black,
-                              fontSize: 25.0,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        "Get our newest and best deals today.",
-                        style: GoogleFonts.dmSans(
-                          textStyle: TextStyle(
-                              color: Color.fromARGB(255, 134, 134, 134),
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.normal),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Center(
-                    child: RoundedSearchField(
-                      onChanged: (value) {
-                        // viewModel.setEmail = value;
-                      },
+      child: SmartRefresher(
+        onRefresh: () async {
+          getStores();
+          await Future.delayed(Duration(milliseconds: 1000));
+          _refreshController.refreshCompleted();
+        },
+        controller: _refreshController,
+        enablePullDown: true,
+        header: WaterDropMaterialHeader(
+          backgroundColor: Colors.white,
+          color: AppTheme.kPrimaryColor,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 40,
                     ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "Foods",
-                    style: GoogleFonts.dmSans(
-                      textStyle: TextStyle(
-                          color: Colors.black,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Stores",
+                          style: GoogleFonts.dmSans(
+                            textStyle: TextStyle(
+                                color: Colors.black,
+                                fontSize: 25.0,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Text(
+                          "Get our newest and best deals today.",
+                          style: GoogleFonts.dmSans(
+                            textStyle: TextStyle(
+                                color: Color.fromARGB(255, 134, 134, 134),
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.normal),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Center(
+                      child: RoundedSearchField(
+                        onChanged: (value) {
+                          // viewModel.setEmail = value;
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    // Text(
+                    //   "Foods",
+                    //   style: GoogleFonts.dmSans(
+                    //     textStyle: TextStyle(
+                    //         color: Colors.black,
+                    //         fontSize: 20.0,
+                    //         fontWeight: FontWeight.bold),
+                    //   ),
+                    // ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(
-              height: 300,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                // shrinkWrap: true,
-                itemCount: data.length,
-                itemBuilder: (context, i) {
-                  return DealCard(
-                      data[i]['image'].toString(),
-                      data[i]['name'].toString(),
-                      data[i]['description'].toString(),
-                      data[i]['price'].toString(),
-                      data[i]['offers'].toString());
-                },
+              // SizedBox(
+              //   height: 300,
+              //   child: ListView.builder(
+              //     scrollDirection: Axis.horizontal,
+              //     // shrinkWrap: true,
+              //     itemCount: data.length,
+              //     itemBuilder: (context, i) {
+              //       return DealCard(
+              //           data[i]['image'].toString(),
+              //           data[i]['name'].toString(),
+              //           data[i]['description'].toString(),
+              //           data[i]['price'].toString(),
+              //           data[i]['offers'].toString());
+              //     },
+              //   ),
+              // ),
+              Container(
+                // height: 800,
+                child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  physics: BouncingScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: hashMap.length,
+                  itemBuilder: (context, i) {
+                    return StoreList(hashMap.keys.elementAt(i)!,
+                        hashMap.values.elementAt(i));
+                  },
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Clothes",
-                  textAlign: TextAlign.left,
-                  style: GoogleFonts.dmSans(
-                    textStyle: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold),
-                  ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container StoreList(String title, List<Message> data) {
+    return Container(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                textAlign: TextAlign.left,
+                style: GoogleFonts.dmSans(
+                  textStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            SizedBox(
-              height: 300,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                // shrinkWrap: true,
-                itemCount: data.length,
-                itemBuilder: (context, i) {
-                  return GestureDetector(
+          ),
+          SizedBox(
+            height: 300,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              physics: BouncingScrollPhysics(),
+              itemCount: data.length,
+              itemBuilder: (context, i) {
+                return GestureDetector(
                     onTap: (() {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return StoreViewPage();
+                            return StoreViewPage(
+                              data: data[i],
+                            );
                             // return LandingDrawerView();
                           },
                         ),
                       );
                     }),
                     child: DealCard(
-                        data[i]['image'].toString(),
-                        data[i]['name'].toString(),
-                        data[i]['description'].toString(),
-                        data[i]['price'].toString(),
-                        data[i]['offers'].toString()),
-                  );
-                },
-              ),
+                        data[i].imageUrl!, data[i].name!, data[i].address!));
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Padding DealCard(String image, String name, String description, String price,
-      String offers) {
+  Padding DealCard(String image, String name, String address) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
         child: Container(
@@ -238,7 +344,7 @@ class _StoresPageState extends State<StoresPage> {
                           width: 10,
                         ),
                         Text(
-                          "All around the island",
+                          address,
                           style: GoogleFonts.dmSans(
                             textStyle: TextStyle(
                                 color: Color.fromARGB(255, 143, 143, 143),

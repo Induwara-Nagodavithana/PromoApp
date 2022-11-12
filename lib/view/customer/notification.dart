@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/theme/theme.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:random_color/random_color.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -14,6 +16,27 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
+  List<dynamic> _notifications = [];
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  void getNotifications() async {
+    var notifications = await DataStore.shared.getNotifications();
+
+    setState(() {
+      _notifications = notifications;
+    });
+    print("_notifications");
+    print(notifications);
+    print(_notifications);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getNotifications();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,21 +55,51 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
         backgroundColor: AppTheme.kPrimaryColor,
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: [
-              ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: 10,
-                itemBuilder: (context, i) {
-                  return NotificationCard(context, 'KFC Deal', '2022/11/06',
-                      'New Deal available in KFC Store.');
-                },
-              )
-            ],
+      body: SmartRefresher(
+        onRefresh: () async {
+          getNotifications();
+          await Future.delayed(Duration(milliseconds: 1000));
+          // if failed,use refreshFailed()
+          // _chartSeriesController?.updateDataSource(
+          //           addedDataIndexes: <int>[_chartData.length -1],
+          //           removedDataIndexes: <int>[0],
+          //         );
+          _refreshController.refreshCompleted();
+        },
+        controller: _refreshController,
+        enablePullDown: true,
+        // enablePullUp: true,
+        header: WaterDropMaterialHeader(
+          // offset: 10,
+          // distance: 100,
+          backgroundColor: Colors.white,
+          color: AppTheme.kPrimaryColor,
+
+          // idleIcon: FaIcon(
+          //   FontAwesomeIcons.rightFromBracket,
+          //   color: Colors.red,
+          // ),
+          // waterDropColor: AppTheme.kPrimaryColor,
+        ),
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: _notifications.length,
+                  itemBuilder: (context, i) {
+                    return NotificationCard(
+                        context,
+                        _notifications[i]['title'],
+                        _notifications[i]['time'].toString().substring(0, 16),
+                        _notifications[i]['body']);
+                  },
+                )
+              ],
+            ),
           ),
         ),
       ),
