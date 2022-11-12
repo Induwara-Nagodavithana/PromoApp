@@ -1,12 +1,19 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:promo_app/helpers/data_store.dart';
+import 'package:promo_app/httpService/httpService.dart';
+import 'package:promo_app/model/subscription.dart';
 import 'package:promo_app/theme/theme.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({super.key});
@@ -16,9 +23,64 @@ class SubscriptionPage extends StatefulWidget {
 }
 
 class _SubscriptionPageState extends State<SubscriptionPage> {
+  List<Message> data = [];
+  RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+  void getSubscriptions() async {
+    ///whatever you want to run on page build
+    var userId = await DataStore.shared.getUserId();
+    HttpService()
+        .getInstance()
+        .get('/subscriptions/getSubscriptionsByUser/$userId')
+        .then((value) async {
+      print(value);
+      SubscriptionModel subscriptionModel =
+          SubscriptionModel.fromJson(jsonDecode(value.data));
+      print(subscriptionModel.message);
+
+      setState(() {
+        data = subscriptionModel.message!;
+      });
+    }).catchError((err) {
+      print(err);
+      Fluttertoast.showToast(
+          msg: "Cannot Get Subscription",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+    // ....
+  }
+
+  Future<void> deleteSubscriptions(String subId) async {
+      print(subId);
+    ///whatever you want to run on page build
+    HttpService()
+        .getInstance()
+        .delete('/subscriptions/$subId')
+        .then((value) async {
+      print(value);
+      getSubscriptions();
+    }).catchError((err) {
+      print(err);
+      Fluttertoast.showToast(
+          msg: "Cannot Delete Subscription",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+    // ....
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getSubscriptions();
+  }
+
   @override
   Widget build(BuildContext context) {
-    Future<void> _showMyDialog() async {
+    Future<void> _showMyDialog(String subId) async {
       return showDialog<void>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -99,8 +161,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                 fontWeight: FontWeight.normal),
                           ),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           // onConfirm();
+                          await deleteSubscriptions(subId);
                           Navigator.pop(context);
                         },
                       ),
@@ -114,89 +177,103 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       );
     }
 
-    return SingleChildScrollView(
-      child: Center(
-        child: Column(
-          children: [
-            ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: 10,
-              itemBuilder: (context, i) {
-                return ListTile(
-                  leading: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                      // color: Color.fromARGB(255, 245, 245, 245),
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     color: Colors.black.withOpacity(0.2),
-                      //     blurRadius: 5.0, // soften the shadow
-                      //     spreadRadius: 1.0, //extend the shadow
-                      //   )
-                      // ],
-                    ),
-                    child: ClipOval(
-                      child: CachedNetworkImage(
-                          height: 50,
-                          width: 50,
-                          imageUrl:
-                              'https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL',
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Center(
-                                child: FaIcon(
-                                  FontAwesomeIcons.store,
-                                  color: AppTheme.kPrimaryColor,
-                                ),
-                              ),
-                          errorWidget: (context, url, error) => Center(
-                                child: FaIcon(
-                                  FontAwesomeIcons.store,
-                                  color: AppTheme.kPrimaryColor,
-                                ),
-                              )),
-                    ),
-                  ),
-                  title: Text(
-                    "Arpico-Galle",
-                    style: GoogleFonts.dmSans(
-                      textStyle: TextStyle(
-                          color: Colors.black,
-                          fontSize: 17.0,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  trailing: FloatingActionButton(
-                      elevation: 0,
-                      onPressed: () {
-                        // Add your onPressed code here!
-                        _showMyDialog();
-                      },
-                      child: FaIcon(
-                        FontAwesomeIcons.circleXmark,
-                        color: Colors.red,
+    return SmartRefresher(
+      onRefresh: () async {
+        getSubscriptions();
+        await Future.delayed(Duration(milliseconds: 1000));
+        _refreshController.refreshCompleted();
+      },
+      controller: _refreshController,
+      enablePullDown: true,
+      header: WaterDropMaterialHeader(
+        backgroundColor: Colors.white,
+        color: AppTheme.kPrimaryColor,
+      ),
+      child: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: data.length,
+                itemBuilder: (context, i) {
+                  return ListTile(
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30)),
+                        // color: Color.fromARGB(255, 245, 245, 245),
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: Colors.black.withOpacity(0.2),
+                        //     blurRadius: 5.0, // soften the shadow
+                        //     spreadRadius: 1.0, //extend the shadow
+                        //   )
+                        // ],
                       ),
-                      backgroundColor: Colors.white),
-                  subtitle: Text(
-                    "Store",
-                    style: GoogleFonts.dmSans(
-                      textStyle: TextStyle(
-                          color: Color.fromARGB(255, 107, 107, 107),
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.normal),
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                            height: 50,
+                            width: 50,
+                            imageUrl: data[i].store!.imageUrl!,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                                  child: FaIcon(
+                                    FontAwesomeIcons.store,
+                                    color: AppTheme.kPrimaryColor,
+                                  ),
+                                ),
+                            errorWidget: (context, url, error) => Center(
+                                  child: FaIcon(
+                                    FontAwesomeIcons.store,
+                                    color: AppTheme.kPrimaryColor,
+                                  ),
+                                )),
+                      ),
                     ),
-                  ),
-                  selected: true,
-                  onTap: () {
-                    // setState(() {
-                    //   txt = 'List Tile pressed';
-                    // });
-                  },
-                );
-              },
-            )
-          ],
+                    title: Text(
+                      data[i].store!.name!,
+                      style: GoogleFonts.dmSans(
+                        textStyle: TextStyle(
+                            color: Colors.black,
+                            fontSize: 17.0,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    trailing: FloatingActionButton(
+                        elevation: 0,
+                        onPressed: () {
+                          // Add your onPressed code here!
+                          _showMyDialog(
+                            data[i].sId!,
+                          );
+                        },
+                        child: FaIcon(
+                          FontAwesomeIcons.circleXmark,
+                          color: Colors.red,
+                        ),
+                        backgroundColor: Colors.white),
+                    subtitle: Text(
+                      "Store",
+                      style: GoogleFonts.dmSans(
+                        textStyle: TextStyle(
+                            color: Color.fromARGB(255, 107, 107, 107),
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.normal),
+                      ),
+                    ),
+                    selected: true,
+                    onTap: () {
+                      // setState(() {
+                      //   txt = 'List Tile pressed';
+                      // });
+                    },
+                  );
+                },
+              )
+            ],
+          ),
         ),
       ),
     );

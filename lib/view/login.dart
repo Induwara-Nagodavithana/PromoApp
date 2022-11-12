@@ -11,6 +11,7 @@ import 'package:promo_app/components/rounded_input_field/rounded_input_field_wid
 import 'package:promo_app/components/rounded_password_field/rounded_password_field_widget.dart';
 import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/httpService/httpService.dart';
+import 'package:promo_app/model/subscription.dart' as SubModel;
 import 'package:promo_app/model/user.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/landing.dart';
@@ -126,8 +127,8 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () async {
                         // viewModel.login();
                         print('{email: $email,password: $password}');
-                        await FirebaseMessaging.instance
-                            .subscribeToTopic('Customer');
+                        // await FirebaseMessaging.instance
+                        //     .subscribeToTopic('Customer');
                         HttpService().getInstance().post('/users/verifyUser',
                             data: {
                               'email': email,
@@ -139,6 +140,8 @@ class _LoginPageState extends State<LoginPage> {
                               UserModel.fromJson(jsonDecode(value.data));
                           print(userModel);
                           DataStore.shared.setUserId = userModel.message!.sId!;
+                          DataStore.shared.setUserName =
+                              userModel.message!.firstName!;
                           if (userModel.message!.type == 'ShopOwner') {
                             Navigator.push(
                               context,
@@ -150,6 +153,30 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             );
                           } else {
+                            HttpService()
+                                .getInstance()
+                                .get(
+                                    '/subscriptions/getSubscriptionsByUser/${userModel.message!.sId!}')
+                                .then((value) async {
+                              print(value);
+                              SubModel.SubscriptionModel subscriptionModel =
+                                  SubModel.SubscriptionModel.fromJson(
+                                      jsonDecode(value.data));
+                              print(subscriptionModel.message);
+                              for (SubModel.Message element
+                                  in subscriptionModel.message!) {
+                                await FirebaseMessaging.instance
+                                    .subscribeToTopic(element.store!.sId!);
+                              }
+                            }).catchError((err) {
+                              print(err);
+                              Fluttertoast.showToast(
+                                  msg: "Cannot Get Subscription",
+                                  backgroundColor:
+                                      Color.fromARGB(255, 211, 47, 47),
+                                  textColor: Colors.white,
+                                  fontSize: 15.0);
+                            });
                             Navigator.push(
                               context,
                               MaterialPageRoute(

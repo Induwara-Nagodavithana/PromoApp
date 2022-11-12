@@ -31,6 +31,7 @@ class DataStore {
 
   late String _token;
   late String _userId;
+  late String _userName;
   List<dynamic> _notifications = [];
 
   Future<void> clearAll() async {
@@ -83,6 +84,24 @@ class DataStore {
     _userId = value;
     _store.then((store) {
       store.setString("userId", value);
+    });
+  }
+
+   Future<String> getUserName() async {
+    if (_userName == null || _userName == 0) {
+      final SharedPreferences store = await _store;
+      final uName = store.getString("userName");
+      _userName = uName!;
+      return uName;
+    } else {
+      return _userName;
+    }
+  }
+
+  set setUserName(String value) {
+    _userName = value;
+    _store.then((store) {
+      store.setString("userName", value);
     });
   }
 

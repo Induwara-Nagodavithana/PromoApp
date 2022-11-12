@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:promo_app/components/rounded_search_field/rounded_search_field_widget.dart';
 import 'package:promo_app/helpers/data_store.dart';
+import 'package:promo_app/httpService/httpService.dart';
+import 'package:promo_app/model/deal.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/offers.dart';
 import 'package:promo_app/view/login.dart';
@@ -17,38 +22,70 @@ class DealPage extends StatefulWidget {
 }
 
 class _DealPageState extends State<DealPage> {
+  List<Message> deals = [];
+  String name = '';
+  void getStores() async {
+    ///whatever you want to run on page build
+    name = await DataStore.shared.getUserName();
+    HttpService().getInstance().get('/deals').then((value) async {
+      print(value);
+
+      DealModel dealModel = DealModel.fromJson(jsonDecode(value.data));
+      print(dealModel.message);
+
+      setState(() {
+        deals = dealModel.message!;
+        name = name;
+      });
+    }).catchError((err) {
+      print(err);
+      Fluttertoast.showToast(
+          msg: "Cannot Get Stores",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+    // ....
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getStores();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    var data = [
-      {
-        "image":
-            "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
-        "name": "MacDoneld",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "1250",
-        "offers": "100"
-      },
-      {
-        "image":
-            "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
-        "name": "KFC",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "4520",
-        "offers": "300"
-      },
-      {
-        "image":
-            "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
-        "name": "Pizza Hut",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "3500",
-        "offers": "1000"
-      }
-    ];
+    // var data = [
+    //   {
+    //     "image":
+    //         "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
+    //     "name": "MacDoneld",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "1250",
+    //     "offers": "100"
+    //   },
+    //   {
+    //     "image":
+    //         "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
+    //     "name": "KFC",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "4520",
+    //     "offers": "300"
+    //   },
+    //   {
+    //     "image":
+    //         "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
+    //     "name": "Pizza Hut",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "3500",
+    //     "offers": "1000"
+    //   }
+    // ];
 
     return Container(
       width: double.infinity,
@@ -110,7 +147,7 @@ class _DealPageState extends State<DealPage> {
                                         ),
                                       ),
                                       Text(
-                                        "Induwara",
+                                        name,
                                         style: GoogleFonts.dmSans(
                                           textStyle: TextStyle(
                                               color: Colors.white,
@@ -192,14 +229,14 @@ class _DealPageState extends State<DealPage> {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         // shrinkWrap: true,
-                        itemCount: data.length,
+                        itemCount: deals.length > 5 ? 5 : deals.length,
                         itemBuilder: (context, i) {
                           return DealCard(
-                              data[i]['image'].toString(),
-                              data[i]['name'].toString(),
-                              data[i]['description'].toString(),
-                              data[i]['price'].toString(),
-                              data[i]['offers'].toString());
+                              deals[i].store!.imageUrl!,
+                              deals[i].store!.name!,
+                              deals[i].description!,
+                              deals[i].price!,
+                              deals[i].offerCount!);
                         },
                       ),
                     ),
@@ -251,14 +288,14 @@ class _DealPageState extends State<DealPage> {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         // shrinkWrap: true,
-                        itemCount: data.length,
+                        itemCount: deals.length > 5 ? 5 : deals.length,
                         itemBuilder: (context, i) {
                           return DealCard(
-                              data[i]['image'].toString(),
-                              data[i]['name'].toString(),
-                              data[i]['description'].toString(),
-                              data[i]['price'].toString(),
-                              data[i]['offers'].toString());
+                              deals[deals.length - 1 - i].store!.imageUrl!,
+                              deals[deals.length - 1 - i].store!.name!,
+                              deals[deals.length - 1 - i].description!,
+                              deals[deals.length - 1 - i].price!,
+                              deals[deals.length - 1 - i].offerCount!);
                         },
                       ),
                     ),
