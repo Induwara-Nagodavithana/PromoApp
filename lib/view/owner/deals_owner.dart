@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:promo_app/components/shimer_deal_card.dart/shimmer_deal_card.dart';
 import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/httpService/httpService.dart';
 import 'package:promo_app/model/deal.dart';
@@ -30,9 +31,14 @@ class _DealOwnerPageState extends State<DealOwnerPage> {
   List<Message> deals = [];
   String userId = '';
   String storeId = '';
+  bool isLoading = true;
+
   void getDeals() async {
     ///whatever you want to run on page build
     ///
+    setState(() {
+      isLoading = true;
+    });
     userId = await DataStore.shared.getUserId();
 
     print('userId');
@@ -67,6 +73,7 @@ class _DealOwnerPageState extends State<DealOwnerPage> {
 
         setState(() {
           deals = dealModel.message!;
+          isLoading = false;
           storeId = storeId;
         });
       }).catchError((err) {
@@ -350,20 +357,33 @@ class _DealOwnerPageState extends State<DealOwnerPage> {
           backgroundColor: Colors.white,
           color: AppTheme.kPrimaryColor,
         ),
-        child: ListView.builder(
-          itemCount: deals.length,
-          itemBuilder: (context, i) {
-            return DealCard(
-                deals[i].store!.imageUrl!,
-                deals[i].store!.name!,
-                deals[i].description!,
-                deals[i].price!,
-                deals[i].offerCount!,
-                deals[i].sId!,
-                _showMyDialog,
-                deals[i]);
-          },
-        ),
+        child: isLoading
+            ? Center(
+                child: ListView.builder(
+                  // scrollDirection: Axis.horizontal,
+                  // shrinkWrap: true,
+                  itemCount: 5,
+                  itemBuilder: (context, i) {
+                    return ShimmerDealCard(
+                      width: size.width,
+                    );
+                  },
+                ),
+              )
+            : ListView.builder(
+                itemCount: deals.length,
+                itemBuilder: (context, i) {
+                  return DealCard(
+                      deals[i].store!.imageUrl!,
+                      deals[i].store!.name!,
+                      deals[i].description!,
+                      deals[i].price!,
+                      deals[i].offerCount!,
+                      deals[i].sId!,
+                      _showMyDialog,
+                      deals[i]);
+                },
+              ),
       ),
     );
   }
@@ -483,7 +503,7 @@ class _DealOwnerPageState extends State<DealOwnerPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                           price,
+                            price,
                             style: GoogleFonts.dmSans(
                               textStyle: TextStyle(
                                   color: AppTheme.kPrimaryColor,

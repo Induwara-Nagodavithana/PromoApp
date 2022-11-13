@@ -17,6 +17,7 @@ import 'package:promo_app/model/user.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/landing.dart';
 import 'package:promo_app/view/owner/landing_owner.dart';
+import 'package:promo_app/view/signup.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,7 +28,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   // String email = 'Nimal@gmail.com';
-  String email = 'n@gmail.com';
+  String email = 'i@gmail.com';
   String password = '1234';
 
   @override
@@ -309,14 +310,14 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) {
-                            //       return SignUpView();
-                            //     },
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return SignUp();
+                                },
+                              ),
+                            );
                           },
                           child: Text(
                             "Sign Up ",

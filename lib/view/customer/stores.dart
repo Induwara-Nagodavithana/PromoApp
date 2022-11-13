@@ -10,11 +10,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:promo_app/components/rounded_search_field/rounded_search_field_widget.dart';
+import 'package:promo_app/components/shimmer_store_card/shimmer_store_card.dart';
 import 'package:promo_app/httpService/httpService.dart';
 import 'package:promo_app/model/store.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/store_view.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:shimmer/shimmer.dart';
 
 class StoresPage extends StatefulWidget {
   const StoresPage({super.key});
@@ -26,11 +28,15 @@ class StoresPage extends StatefulWidget {
 class _StoresPageState extends State<StoresPage> {
   List<Message> stores = [];
   HashMap<String?, List<Message>> hashMap = HashMap<String?, List<Message>>();
+  bool isLoading = true;
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   void getStores() async {
     ///whatever you want to run on page build
+    setState(() {
+      isLoading = true;
+    });
     HttpService().getInstance().get('/stores').then((value) async {
       print(value);
 
@@ -73,6 +79,7 @@ class _StoresPageState extends State<StoresPage> {
         hashMap.forEach((key, value) {
           print('$key : ${value.length} ${value[0].name} ');
         });
+        isLoading = false;
       });
     }).catchError((err) {
       print(err);
@@ -215,19 +222,58 @@ class _StoresPageState extends State<StoresPage> {
               //     },
               //   ),
               // ),
-              Container(
-                // height: 800,
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  physics: BouncingScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: hashMap.length,
-                  itemBuilder: (context, i) {
-                    return StoreList(hashMap.keys.elementAt(i)!,
-                        hashMap.values.elementAt(i));
-                  },
-                ),
-              ),
+              isLoading
+                  ? Container(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Shimmer.fromColors(
+                                baseColor: Color.fromARGB(255, 177, 176, 176),
+                                highlightColor:
+                                    Color.fromARGB(255, 116, 114, 114),
+                                child: Container(
+                                    width: 200,
+                                    height: 25,
+                                    // margin: const EdgeInsets.all(5.0),
+                                    decoration: BoxDecoration(
+                                      color: Color.fromARGB(255, 245, 245, 245),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(5)),
+                                    )),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 300,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: BouncingScrollPhysics(),
+                              // shrinkWrap: true,
+                              itemCount: 5,
+                              itemBuilder: (context, i) {
+                                return ShimmerStoreCard();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      // height: 800,
+                      child: ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        physics: BouncingScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: hashMap.length,
+                        itemBuilder: (context, i) {
+                          return StoreList(hashMap.keys.elementAt(i)!,
+                              hashMap.values.elementAt(i));
+                        },
+                      ),
+                    ),
             ],
           ),
         ),
@@ -255,33 +301,46 @@ class _StoresPageState extends State<StoresPage> {
               ),
             ),
           ),
-          SizedBox(
-            height: 300,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              shrinkWrap: true,
-              physics: BouncingScrollPhysics(),
-              itemCount: data.length,
-              itemBuilder: (context, i) {
-                return GestureDetector(
-                    onTap: (() {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return StoreViewPage(
-                              data: data[i],
+          isLoading
+              ? SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: BouncingScrollPhysics(),
+                    // shrinkWrap: true,
+                    itemCount: 5,
+                    itemBuilder: (context, i) {
+                      return ShimmerStoreCard();
+                    },
+                  ),
+                )
+              : SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    physics: BouncingScrollPhysics(),
+                    itemCount: data.length,
+                    itemBuilder: (context, i) {
+                      return GestureDetector(
+                          onTap: (() {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return StoreViewPage(
+                                    data: data[i],
+                                  );
+                                  // return LandingDrawerView();
+                                },
+                              ),
                             );
-                            // return LandingDrawerView();
-                          },
-                        ),
-                      );
-                    }),
-                    child: DealCard(
-                        data[i].imageUrl!, data[i].name!, data[i].address!));
-              },
-            ),
-          ),
+                          }),
+                          child: DealCard(data[i].imageUrl!, data[i].name!,
+                              data[i].address!));
+                    },
+                  ),
+                ),
         ],
       ),
     );

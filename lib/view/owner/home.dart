@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:promo_app/components/rounded_search_field/rounded_search_field_widget.dart';
+import 'package:promo_app/components/shimer_deal_card.dart/shimmer_deal_card.dart';
 import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/httpService/httpService.dart';
 import 'package:promo_app/model/deal.dart';
@@ -16,6 +17,7 @@ import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/offers.dart';
 import 'package:promo_app/view/login.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HomePage extends StatefulWidget {
@@ -67,7 +69,12 @@ class _HomePageState extends State<HomePage> {
 
   List<Message> deals = [];
   String name = '';
+  bool isLoading = true;
   void getDeals() async {
+    setState(() {
+      isLoading = true;
+    });
+
     ///whatever you want to run on page build
     name = await DataStore.shared.getUserName();
     HttpService().getInstance().get('/deals').then((value) async {
@@ -79,6 +86,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         deals = dealModel.message!;
         name = name;
+        isLoading = false;
       });
       _refreshController.refreshCompleted();
     }).catchError((err) {
@@ -530,22 +538,35 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        SizedBox(
-                          height: 200,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            // shrinkWrap: true,
-                            itemCount: deals.length > 5 ? 5 : deals.length,
-                            itemBuilder: (context, i) {
-                              return DealCard(
-                                  deals[i].store!.imageUrl!,
-                                  deals[i].store!.name!,
-                                  deals[i].description!,
-                                  deals[i].price!,
-                                  deals[i].offerCount!);
-                            },
-                          ),
-                        ),
+                        isLoading
+                            ? SizedBox(
+                                height: 200,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  // shrinkWrap: true,
+                                  itemCount: 5,
+                                  itemBuilder: (context, i) {
+                                    return ShimmerDealCard();
+                                  },
+                                ),
+                              )
+                            : SizedBox(
+                                height: 200,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  // shrinkWrap: true,
+                                  itemCount:
+                                      deals.length > 5 ? 5 : deals.length,
+                                  itemBuilder: (context, i) {
+                                    return DealCard(
+                                        deals[i].store!.imageUrl!,
+                                        deals[i].store!.name!,
+                                        deals[i].description!,
+                                        deals[i].price!,
+                                        deals[i].offerCount!);
+                                  },
+                                ),
+                              ),
                       ],
                     ),
                   ),
