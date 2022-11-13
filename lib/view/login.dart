@@ -11,6 +11,7 @@ import 'package:promo_app/components/rounded_input_field/rounded_input_field_wid
 import 'package:promo_app/components/rounded_password_field/rounded_password_field_widget.dart';
 import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/httpService/httpService.dart';
+import 'package:promo_app/model/store.dart';
 import 'package:promo_app/model/subscription.dart' as SubModel;
 import 'package:promo_app/model/user.dart';
 import 'package:promo_app/theme/theme.dart';
@@ -26,7 +27,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   // String email = 'Nimal@gmail.com';
-  String email = 'i@gmail.com';
+  String email = 'n@gmail.com';
   String password = '1234';
 
   @override
@@ -143,6 +144,8 @@ class _LoginPageState extends State<LoginPage> {
                           DataStore.shared.setUserName =
                               userModel.message!.firstName!;
                           if (userModel.message!.type == 'ShopOwner') {
+                            
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(

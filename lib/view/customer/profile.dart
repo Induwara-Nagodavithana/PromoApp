@@ -123,7 +123,7 @@ class _ProfileState extends State<Profile> {
                                 height: 100,
                                 width: 100,
                                 imageUrl:
-                                    'https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454',
+                                    'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => Image.asset(
                                   'assets/images/dp.jpg',

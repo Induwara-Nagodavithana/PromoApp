@@ -4,10 +4,12 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:promo_app/model/deal.dart';
 import 'package:promo_app/theme/theme.dart';
 
 class OfferPage extends StatefulWidget {
-  const OfferPage({super.key});
+  final List<Message> data;
+  const OfferPage({Key? key, required this.data}) : super(key: key);
 
   @override
   State<OfferPage> createState() => _OfferPageState();
@@ -17,89 +19,89 @@ class _OfferPageState extends State<OfferPage> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    var data = [
-      {
-        "image":
-            "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
-        "name": "MacDoneld",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "1250",
-        "offers": "100"
-      },
-      {
-        "image":
-            "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
-        "name": "KFC",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "4520",
-        "offers": "300"
-      },
-      {
-        "image":
-            "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
-        "name": "Pizza Hut",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "3500",
-        "offers": "1000"
-      },
-      {
-        "image":
-            "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
-        "name": "MacDoneld",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "1250",
-        "offers": "100"
-      },
-      {
-        "image":
-            "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
-        "name": "KFC",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "4520",
-        "offers": "300"
-      },
-      {
-        "image":
-            "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
-        "name": "Pizza Hut",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "3500",
-        "offers": "1000"
-      },
-      {
-        "image":
-            "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
-        "name": "MacDoneld",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "1250",
-        "offers": "100"
-      },
-      {
-        "image":
-            "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
-        "name": "KFC",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "4520",
-        "offers": "300"
-      },
-      {
-        "image":
-            "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
-        "name": "Pizza Hut",
-        "description":
-            "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
-        "price": "3500",
-        "offers": "1000"
-      }
-    ];
+    // var data = [
+    //   {
+    //     "image":
+    //         "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
+    //     "name": "MacDoneld",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "1250",
+    //     "offers": "100"
+    //   },
+    //   {
+    //     "image":
+    //         "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
+    //     "name": "KFC",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "4520",
+    //     "offers": "300"
+    //   },
+    //   {
+    //     "image":
+    //         "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
+    //     "name": "Pizza Hut",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "3500",
+    //     "offers": "1000"
+    //   },
+    //   {
+    //     "image":
+    //         "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
+    //     "name": "MacDoneld",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "1250",
+    //     "offers": "100"
+    //   },
+    //   {
+    //     "image":
+    //         "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
+    //     "name": "KFC",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "4520",
+    //     "offers": "300"
+    //   },
+    //   {
+    //     "image":
+    //         "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
+    //     "name": "Pizza Hut",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "3500",
+    //     "offers": "1000"
+    //   },
+    //   {
+    //     "image":
+    //         "https://play-lh.googleusercontent.com/0loj-whL4XSeF4v5W3d213b1pH0RRTQUlmK1VESE-Rsydp06rVyPTq_Hwpwm1avB8URL",
+    //     "name": "MacDoneld",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "1250",
+    //     "offers": "100"
+    //   },
+    //   {
+    //     "image":
+    //         "https://w7.pngwing.com/pngs/476/680/png-transparent-colonel-sanders-kfc-fried-chicken-fast-food-restaurant-beauty-parlor-s-food-fast-food-restaurant-logo.png",
+    //     "name": "KFC",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "4520",
+    //     "offers": "300"
+    //   },
+    //   {
+    //     "image":
+    //         "https://static.wikia.nocookie.net/tacobell/images/1/18/Pizza_Hut_logo.svg.png/revision/latest?cb=20161212011454",
+    //     "name": "Pizza Hut",
+    //     "description":
+    //         "Get Big Burger and Pepsi 1L bottle 50% off before 12th Nov 2022.",
+    //     "price": "3500",
+    //     "offers": "1000"
+    //   }
+    // ];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -120,14 +122,14 @@ class _OfferPageState extends State<OfferPage> {
       body: ListView.builder(
         // scrollDirection: Axis.horizontal,
         // shrinkWrap: true,
-        itemCount: data.length,
+        itemCount: widget.data.length,
         itemBuilder: (context, i) {
           return DealCard(
-              data[i]['image'].toString(),
-              data[i]['name'].toString(),
-              data[i]['description'].toString(),
-              data[i]['price'].toString(),
-              data[i]['offers'].toString());
+              widget.data[i].store!.imageUrl!,
+              widget.data[i].store!.name!,
+              widget.data[i].description!,
+              widget.data[i].price!,
+              widget.data[i].offerCount!);
         },
       ),
     );
@@ -212,7 +214,7 @@ class _OfferPageState extends State<OfferPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Rs $price",
+                          price,
                           style: GoogleFonts.dmSans(
                             textStyle: TextStyle(
                                 color: AppTheme.kPrimaryColor,

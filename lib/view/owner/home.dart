@@ -1,12 +1,20 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:promo_app/components/rounded_search_field/rounded_search_field_widget.dart';
+import 'package:promo_app/helpers/data_store.dart';
+import 'package:promo_app/httpService/httpService.dart';
+import 'package:promo_app/model/deal.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:promo_app/view/customer/offers.dart';
+import 'package:promo_app/view/login.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -56,6 +64,42 @@ class _HomePageState extends State<HomePage> {
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+
+  List<Message> deals = [];
+  String name = '';
+  void getDeals() async {
+    ///whatever you want to run on page build
+    name = await DataStore.shared.getUserName();
+    HttpService().getInstance().get('/deals').then((value) async {
+      print(value);
+
+      DealModel dealModel = DealModel.fromJson(jsonDecode(value.data));
+      print(dealModel.message);
+
+      setState(() {
+        deals = dealModel.message!;
+        name = name;
+      });
+      _refreshController.refreshCompleted();
+    }).catchError((err) {
+      print(err);
+      _refreshController.refreshCompleted();
+
+      Fluttertoast.showToast(
+          msg: "Cannot Get Deals",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+    // ....
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getDeals();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -91,14 +135,13 @@ class _HomePageState extends State<HomePage> {
     return SmartRefresher(
       onRefresh: () async {
         _chartSeriesController?.animate();
-
+        getDeals();
         await Future.delayed(Duration(milliseconds: 1000));
         // if failed,use refreshFailed()
         // _chartSeriesController?.updateDataSource(
         //           addedDataIndexes: <int>[_chartData.length -1],
         //           removedDataIndexes: <int>[0],
         //         );
-        _refreshController.refreshCompleted();
       },
       controller: _refreshController,
       enablePullDown: true,
@@ -179,7 +222,7 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           ),
                                           Text(
-                                            "Induwara",
+                                            name,
                                             style: GoogleFonts.dmSans(
                                               textStyle: TextStyle(
                                                   color: Colors.white,
@@ -201,9 +244,20 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                   FloatingActionButton(
+                                    heroTag: "btn4",
                                     elevation: 0,
-                                    onPressed: () {
+                                    onPressed: () async {
                                       // Add your onPressed code here!
+                                      await DataStore.shared.clearAll();
+
+                                      PersistentNavBarNavigator.pushNewScreen(
+                                        context,
+                                        screen: LoginPage(),
+                                        withNavBar:
+                                            false, // OPTIONAL VALUE. True by default.
+                                        pageTransitionAnimation:
+                                            PageTransitionAnimation.cupertino,
+                                      );
                                     },
                                     child: FaIcon(
                                       FontAwesomeIcons.rightFromBracket,
@@ -454,7 +508,9 @@ class _HomePageState extends State<HomePage> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) {
-                                        return OfferPage();
+                                        return OfferPage(
+                                          data: deals,
+                                        );
                                       },
                                     ),
                                   );
@@ -479,14 +535,14 @@ class _HomePageState extends State<HomePage> {
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             // shrinkWrap: true,
-                            itemCount: data.length,
+                            itemCount: deals.length > 5 ? 5 : deals.length,
                             itemBuilder: (context, i) {
                               return DealCard(
-                                  data[i]['image'].toString(),
-                                  data[i]['name'].toString(),
-                                  data[i]['description'].toString(),
-                                  data[i]['price'].toString(),
-                                  data[i]['offers'].toString());
+                                  deals[i].store!.imageUrl!,
+                                  deals[i].store!.name!,
+                                  deals[i].description!,
+                                  deals[i].price!,
+                                  deals[i].offerCount!);
                             },
                           ),
                         ),
@@ -581,7 +637,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Rs $price",
+                          price,
                           style: GoogleFonts.dmSans(
                             textStyle: TextStyle(
                                 color: AppTheme.kPrimaryColor,

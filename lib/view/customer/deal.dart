@@ -24,7 +24,7 @@ class DealPage extends StatefulWidget {
 class _DealPageState extends State<DealPage> {
   List<Message> deals = [];
   String name = '';
-  void getStores() async {
+  void getDeals() async {
     ///whatever you want to run on page build
     name = await DataStore.shared.getUserName();
     HttpService().getInstance().get('/deals').then((value) async {
@@ -51,7 +51,7 @@ class _DealPageState extends State<DealPage> {
   @override
   void initState() {
     super.initState();
-    getStores();
+    getDeals();
   }
 
   @override
@@ -169,6 +169,7 @@ class _DealPageState extends State<DealPage> {
                                 ],
                               ),
                               FloatingActionButton(
+                                heroTag: "btn3",
                                 elevation: 0,
                                 onPressed: () async {
                                   // Add your onPressed code here!
@@ -264,7 +265,7 @@ class _DealPageState extends State<DealPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) {
-                                    return OfferPage();
+                                    return OfferPage(data:deals);
                                   },
                                 ),
                               );
@@ -388,7 +389,7 @@ class _DealPageState extends State<DealPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Rs $price",
+                          price,
                           style: GoogleFonts.dmSans(
                             textStyle: TextStyle(
                                 color: AppTheme.kPrimaryColor,

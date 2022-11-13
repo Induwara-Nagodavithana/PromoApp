@@ -1,14 +1,36 @@
 class StoreModel {
   List<Message>? message;
+  Message? oneMessage;
 
   StoreModel({this.message});
 
   StoreModel.fromJson(Map<String, dynamic> json) {
+    print("dsfsdfsdfsdfsfdsfsdfsdfsdfdsf456456");
     if (json['message'] != null) {
-      message = <Message>[];
-      json['message'].forEach((v) {
-        message!.add(new Message.fromJson(v));
-      });
+      try {
+        print("111111111111111111111");
+
+        oneMessage = new Message.fromJson(json['message']);
+      } catch (e) {
+        print("3333333333333333333");
+
+        message = <Message>[];
+        json['message'].forEach((v) {
+          message!.add(new Message.fromJson(v));
+        });
+      }
+      // if (json['message'] is List) {
+      //   print("111111111111111111111");
+
+      //   oneMessage = new Message.fromJson(json['message']);
+      // } else {
+      //   print("3333333333333333333");
+
+      //   message = <Message>[];
+      //   json['message'].forEach((v) {
+      //     message!.add(new Message.fromJson(v));
+      //   });
+      // }
     }
   }
 

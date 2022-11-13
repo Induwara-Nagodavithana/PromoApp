@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:promo_app/components/rectangle_text_field/rectangle_text_field.dart';
+import 'package:promo_app/helpers/data_store.dart';
+import 'package:promo_app/httpService/httpService.dart';
+import 'package:promo_app/model/deal.dart';
 import 'package:promo_app/theme/theme.dart';
 
 class AddDealsPage extends StatefulWidget {
-  const AddDealsPage({super.key});
+  final Message? data;
+  const AddDealsPage({
+    Key? key,
+    this.data, // nullable and optional
+  }) : super(key: key);
 
   @override
   State<AddDealsPage> createState() => _AddDealsPageState();
@@ -16,13 +24,87 @@ class _AddDealsPageState extends State<AddDealsPage> {
   String description = '';
   String price = '';
   String offercount = '';
+
+  Future<void> addDeals() async {
+    // _refreshController.refreshToIdle();
+    String storeId = await DataStore.shared.getStoreId();
+
+    ///whatever you want to run on page build
+
+    HttpService().getInstance().post('/deals', data: {
+      "description": description,
+      "price": price,
+      "offerCount": offercount,
+      "store": storeId
+    }).then((value) async {
+      print(value);
+      ;
+      Fluttertoast.showToast(
+          msg: "Deal Added",
+          backgroundColor: Color.fromARGB(255, 46, 125, 50),
+          textColor: Colors.white,
+          fontSize: 15.0);
+      Navigator.pop(context);
+    }).catchError((err) {
+      print(err);
+      Fluttertoast.showToast(
+          msg: "Cannot Add Deal",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+    // ....
+  }
+
+  Future<void> saveDeals(String dealId) async {
+    // _refreshController.refreshToIdle();
+    String storeId = await DataStore.shared.getStoreId();
+
+    ///whatever you want to run on page build
+
+    HttpService().getInstance().put('/deals/$dealId', data: {
+      "description": description,
+      "price": price,
+      "offerCount": offercount,
+      "store": storeId
+    }).then((value) async {
+      print(value);
+      Fluttertoast.showToast(
+          msg: "Deal Saved",
+          backgroundColor: Color.fromARGB(255, 46, 125, 50),
+          textColor: Colors.white,
+          fontSize: 15.0);
+      Navigator.pop(context);
+    }).catchError((err) {
+      print(err);
+      Fluttertoast.showToast(
+          msg: "Cannot Save Deal",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+    // ....
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.data != null) {
+      setState(() {
+        description = widget.data!.description!;
+        price = widget.data!.price!;
+        offercount = widget.data!.offerCount!;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            "All Offers",
+            "Offers",
             textAlign: TextAlign.center,
             style: GoogleFonts.dmSans(
               textStyle: TextStyle(
@@ -101,8 +183,8 @@ class _AddDealsPageState extends State<AddDealsPage> {
                   ),
                 ),
                 RectangleTextField(
-                    labelText: "Price",
-                    hintText: "Enter price of the deal",
+                    labelText: "Expire Date",
+                    hintText: "Enter expire date of the deal",
                     value: price,
                     onChanged: ((value) {
                       // setState(() {
@@ -118,9 +200,9 @@ class _AddDealsPageState extends State<AddDealsPage> {
                       offercount = value;
                       // });
                     })),
-                    SizedBox(
-                      height: 50,
-                    ),
+                SizedBox(
+                  height: 50,
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     primary: AppTheme.kPrimaryColor,
@@ -130,9 +212,15 @@ class _AddDealsPageState extends State<AddDealsPage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    if (widget.data != null) {
+                      saveDeals(widget.data!.sId!);
+                    } else {
+                      addDeals();
+                    }
+                  },
                   child: Text(
-                    'Add',
+                    'Save',
                     style: GoogleFonts.dmSans(
                       textStyle: TextStyle(
                           color: Colors.white,
