@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,12 +8,14 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:promo_app/components/rectangle_text_field/rectangle_text_field.dart';
 import 'package:promo_app/helpers/data_store.dart';
 import 'package:promo_app/httpService/httpService.dart';
 import 'package:promo_app/model/user.dart';
 import 'package:promo_app/theme/theme.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:path/path.dart' as p;
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -30,7 +33,13 @@ class _ProfileState extends State<Profile> {
   String address = '';
   String contactNo = '';
   String email = '';
+  String imageUrl =
+      'https://promo-deal-bucket.s3.us-east-2.amazonaws.com/upload-to-s3/dp.jpg';
+  String baseUrl = 'https://promo-deal-bucket.s3.us-east-2.amazonaws.com/';
+
   late String userId;
+
+  late PickedFile _image;
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
@@ -52,6 +61,10 @@ class _ProfileState extends State<Profile> {
         address = userModel.message!.address!;
         contactNo = userModel.message!.contactNo!;
         email = userModel.message!.email!;
+        bool _validURL = Uri.parse(userModel.message!.imageUrl!).isAbsolute;
+        if (_validURL) {
+          imageUrl = userModel.message!.imageUrl!;
+        }
       });
     }).catchError((err) {
       print(err);
@@ -62,6 +75,104 @@ class _ProfileState extends State<Profile> {
           fontSize: 15.0);
     });
     // ....
+  }
+
+  Future uploadImages() async {
+    print(_image);
+    print(_image.path);
+    File myImage = File(_image.path);
+    String fileExtension = p.extension(myImage.path);
+    print("fileExtension");
+    print(fileExtension);
+    List<int> imageBytes = await _image.readAsBytes();
+    print(imageBytes);
+    String base64Image = base64Encode(imageBytes);
+    print("base64Image");
+    print(base64Image);
+
+    HttpService().getInstance().post('/users/uploadUserImage', data: {
+      "file": base64Image,
+      "type": fileExtension.substring(1)
+    }).then((value) {
+      Map<String, dynamic> data = jsonDecode(value.data);
+      print("data.keys.contains('message')");
+      print(data['message']);
+      print('$baseUrl${data['message']}');
+
+      HttpService().getInstance().put('/users/$userId', data: {
+        'imageUrl': '$baseUrl${data['message']}',
+      }).then((value) {
+        print(value);
+        Fluttertoast.showToast(
+            msg: "Image Uploaded",
+            backgroundColor: Color.fromARGB(255, 46, 125, 50),
+            textColor: Colors.white,
+            fontSize: 15.0);
+        getUserDetails();
+      }).catchError((err) {
+        print(err);
+        Fluttertoast.showToast(
+            msg: "Cannot Update User",
+            backgroundColor: Color.fromARGB(255, 211, 47, 47),
+            textColor: Colors.white,
+            fontSize: 15.0);
+      });
+    }).catchError((err) {
+      print(err);
+      Fluttertoast.showToast(
+          msg: "Cannot Get User",
+          backgroundColor: Color.fromARGB(255, 211, 47, 47),
+          textColor: Colors.white,
+          fontSize: 15.0);
+    });
+  }
+
+  Future showImagePicker(context) async {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () async {
+                        await imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () async {
+                      await imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Future imgFromCamera() async {
+    PickedFile? image3 = await ImagePicker()
+        .getImage(source: ImageSource.camera, imageQuality: 50);
+    setState(() {
+      _image = image3!;
+    });
+    uploadImages();
+  }
+
+  Future imgFromGallery() async {
+    PickedFile? image3 = await ImagePicker()
+        .getImage(source: ImageSource.gallery, imageQuality: 50);
+    setState(() {
+      _image = image3!;
+    });
+    uploadImages();
   }
 
   @override
@@ -122,8 +233,7 @@ class _ProfileState extends State<Profile> {
                               child: CachedNetworkImage(
                                 height: 100,
                                 width: 100,
-                                imageUrl:
-                                    'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+                                imageUrl: imageUrl,
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => Image.asset(
                                   'assets/images/dp.jpg',
@@ -143,6 +253,7 @@ class _ProfileState extends State<Profile> {
                               borderRadius: BorderRadius.circular(100),
                               onTap: () async {
                                 // await viewModel.showImagePicker(context);
+                                await showImagePicker(context);
                               },
                               child: Container(
                                   height: 30,

@@ -38,7 +38,7 @@ class _AddDealsPageState extends State<AddDealsPage> {
       "store": storeId
     }).then((value) async {
       print(value);
-      ;
+      
       Fluttertoast.showToast(
           msg: "Deal Added",
           backgroundColor: Color.fromARGB(255, 46, 125, 50),

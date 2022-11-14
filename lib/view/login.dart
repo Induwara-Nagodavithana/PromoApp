@@ -28,7 +28,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   // String email = 'Nimal@gmail.com';
-  String email = 'i@gmail.com';
+  String email = 'n@gmail.com';
   String password = '1234';
 
   @override

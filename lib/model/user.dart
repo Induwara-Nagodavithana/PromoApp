@@ -27,6 +27,7 @@ class Message {
   String? address;
   String? email;
   String? contactNo;
+  String? imageUrl;
   int? iV;
 
   Message(
@@ -51,6 +52,7 @@ class Message {
     address = json['address'];
     email = json['email'];
     contactNo = json['contactNo'];
+    imageUrl = json['imageUrl'];
     iV = json['__v'];
   }
 
@@ -65,6 +67,7 @@ class Message {
     data['address'] = this.address;
     data['email'] = this.email;
     data['contactNo'] = this.contactNo;
+    data['imageUrl'] = this.imageUrl;
     data['__v'] = this.iV;
     return data;
   }
