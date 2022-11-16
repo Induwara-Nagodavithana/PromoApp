@@ -315,7 +315,7 @@ class _StoresPageState extends State<StoresPage> {
                   ),
                 )
               : SizedBox(
-                  height: 300,
+                  height: 305,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
@@ -402,13 +402,18 @@ class _StoresPageState extends State<StoresPage> {
                         SizedBox(
                           width: 10,
                         ),
-                        Text(
-                          address,
-                          style: GoogleFonts.dmSans(
-                            textStyle: TextStyle(
-                                color: Color.fromARGB(255, 143, 143, 143),
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.normal),
+                        SizedBox(
+                          width: 235,
+                          child: Text(
+                            address,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 5,
+                            style: GoogleFonts.dmSans(
+                              textStyle: TextStyle(
+                                  color: Color.fromARGB(255, 143, 143, 143),
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.normal),
+                            ),
                           ),
                         ),
                       ],
