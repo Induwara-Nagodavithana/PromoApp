@@ -316,6 +316,7 @@ class _StoresPageState extends State<StoresPage> {
                 )
               : SizedBox(
                   height: 305,
+                  
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
